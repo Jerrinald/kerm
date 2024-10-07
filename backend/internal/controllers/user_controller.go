@@ -99,8 +99,6 @@ func RegisterUser(db *gorm.DB) http.HandlerFunc {
 			return
 		}
 
-		sendWelcomeEmail(user.Email)
-
 		w.WriteHeader(http.StatusCreated)
 		json.NewEncoder(w).Encode(user)
 	}
