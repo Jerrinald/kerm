@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_flash_event/authentication/authentication_bloc.dart';
 import 'package:flutter_flash_event/authentication/authentication_event.dart';
+import 'package:flutter_flash_event/home/home_screen.dart';
 import 'package:flutter_flash_event/login/bloc/login_bloc.dart';
 import 'package:flutter_flash_event/login/bloc/login_event.dart';
 import 'package:flutter_flash_event/login/bloc/login_state.dart';
-import 'package:flutter_flash_event/widgets/main_screen.dart';
 import '../screens/register_screen.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -14,6 +14,10 @@ class LoginScreen extends StatelessWidget {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+
+  static navigateTo(BuildContext context) {
+    Navigator.of(context).pushNamed(routeName);
+  }
 
   LoginScreen({super.key});
 
@@ -39,7 +43,7 @@ class LoginScreen extends StatelessWidget {
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => MainScreen(userRole: state.userRole),
+                  builder: (context) => HomeScreen(),
                 ),
               );
             } else if (state is LoginFailure) {

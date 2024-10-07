@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:developer';
-import 'package:flutter_flash_event/core/models/transportation.dart';
 import 'package:flutter_flash_event/core/models/user.dart';
 import 'package:flutter_flash_event/core/services/api_endpoints.dart';
 import 'package:http/http.dart' as http;
@@ -42,7 +41,7 @@ class UserServices {
     String? token = prefs.getString('token');
     try {
       final response = await http.get(
-        Uri.https(ApiEndpoints.baseUrl, '/my-user'),
+        Uri.parse('http://10.0.2.2:8000/my-user'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
           'Authorization': 'Bearer $token', // Include token in headers
@@ -213,59 +212,7 @@ class UserServices {
     }
   }
 
-  static Future<List<UserTransport>> getParticipantsByTransportation(
-      {required int id}) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('token');
-    try {
-      final response = await http.get(
-        Uri.https(ApiEndpoints.baseUrl, '/transportation/$id/participants'),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-          'Authorization': 'Bearer $token', // Include token in headers
-        },
-      );
 
-      if (response.statusCode < 200 || response.statusCode >= 400) {
-        throw Exception('Failed to load participants');
-      }
-
-      final List<dynamic> participantsData = json.decode(response.body);
-      return participantsData
-          .map((data) => UserTransport.fromJson(data))
-          .toList();
-    } catch (error) {
-      log('Error occurred while retrieving participants.', error: error);
-      rethrow;
-    }
-  }
-
-  static Future<List<String>> getAllUserEmails({required int id}) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('token');
-
-    try {
-      final response = await http.get(
-        Uri.https(ApiEndpoints.baseUrl, '/users-emails/$id'),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-          'Authorization': 'Bearer $token', // Include token in headers
-        },
-      );
-
-      if (response.statusCode < 200 || response.statusCode >= 400) {
-        throw ApiException(
-            message: 'Error while requesting user emails',
-            statusCode: response.statusCode);
-      }
-
-      final List<dynamic> emailsData = json.decode(response.body);
-      return List<String>.from(emailsData);
-    } catch (error) {
-      log('Error occurred while retrieving user emails.', error: error);
-      throw ApiException(message: 'Unknown error while requesting user emails');
-    }
-  }
 
   static Future<User> getUser({required int id}) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();

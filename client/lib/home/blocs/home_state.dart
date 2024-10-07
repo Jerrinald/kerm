@@ -8,10 +8,10 @@ final class HomeInitial extends HomeState {}
 final class HomeLoading extends HomeState {}
 
 final class HomeDataLoadSuccess extends HomeState {
-  final List<Event> myEvents;
-  final List<Event> createdEvents;
+  final List<Kermesse> myKermesses;
+  final List<Kermesse> allKermesses;
 
-  HomeDataLoadSuccess({required this.myEvents, required this.createdEvents});
+  HomeDataLoadSuccess({required this.myKermesses, required this.allKermesses});
 }
 
 

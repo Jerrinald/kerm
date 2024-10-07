@@ -7,7 +7,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_flash_event/firebase_options.dart';
 import 'package:flutter_flash_event/screens/splash_screen.dart';
 import 'package:flutter_flash_event/routes.dart';
-import 'package:flutter_flash_event/widgets/main_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

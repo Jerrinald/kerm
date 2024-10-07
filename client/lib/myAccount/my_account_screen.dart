@@ -12,13 +12,6 @@ class MyAccountScreen extends StatelessWidget {
   }
 
   const MyAccountScreen({super.key});
-
-  Future<void> _logout(BuildContext context) async {
-    await AuthServices.logoutUser();
-    // Navigate to LoginScreen
-
-  }
-
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -41,53 +34,11 @@ class MyAccountScreen extends StatelessWidget {
                   ),
                 ],
               ),
-              body: state.status == MyAccountStatus.loading
-                  ? const Center(
-                child: CircularProgressIndicator(),
-              )
-                  : user != null
-                  ? Padding(
+              body:  Padding(
                 padding: const EdgeInsets.all(20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      user.username,
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      user.email,
-                      style: const TextStyle(
-                        color: Colors.grey,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Text(
-                                '${user.firstname} - ${user.lastname}',
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
                     const Spacer(),
                     SizedBox(
                       width: double.infinity,
@@ -100,16 +51,24 @@ class MyAccountScreen extends StatelessWidget {
                           ),
                           padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
                         ),
-                        onPressed: () => _logout(context),
+                        onPressed:  () {
+                          BlocProvider.of<MyAccountBloc>(context).add(MyAccountLogout(
+                            success: () {
+                              LoginScreen.navigateTo(context);
+                            },
+                            error: (errorMessage) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(errorMessage)),
+                              );
+                            },
+                          ));
+                        },
                         child: const Text('Déconnexion'),
                       ),
                     ),
                   ],
                 ),
               )
-                  : const Center(
-                child: Text('Event not found'),
-              ),
             ),
           );
         },

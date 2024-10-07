@@ -1,86 +1,76 @@
 package controllers
 
-import (
-	"backend/internal/database"
-	"backend/internal/models"
-	"net/http"
-	"sync"
+// var upgrader = websocket.Upgrader{
+// 	ReadBufferSize:  1024,
+// 	WriteBufferSize: 1024,
+// 	CheckOrigin: func(r *http.Request) bool {
+// 		return true
+// 	},
+// }
 
-	"github.com/gorilla/websocket"
-	"gorm.io/gorm"
-)
+// type WebSocketManager struct {
+// 	clients map[*websocket.Conn]bool
+// 	mutex   sync.Mutex
+// }
 
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
-	CheckOrigin: func(r *http.Request) bool {
-		return true
-	},
-}
+// var wsManager = WebSocketManager{
+// 	clients: make(map[*websocket.Conn]bool),
+// }
 
-type WebSocketManager struct {
-	clients map[*websocket.Conn]bool
-	mutex   sync.Mutex
-}
+// func (manager *WebSocketManager) addClient(conn *websocket.Conn) {
+// 	manager.mutex.Lock()
+// 	defer manager.mutex.Unlock()
+// 	manager.clients[conn] = true
+// }
 
-var wsManager = WebSocketManager{
-	clients: make(map[*websocket.Conn]bool),
-}
+// func (manager *WebSocketManager) removeClient(conn *websocket.Conn) {
+// 	manager.mutex.Lock()
+// 	defer manager.mutex.Unlock()
+// 	delete(manager.clients, conn)
+// }
 
-func (manager *WebSocketManager) addClient(conn *websocket.Conn) {
-	manager.mutex.Lock()
-	defer manager.mutex.Unlock()
-	manager.clients[conn] = true
-}
+// func (manager *WebSocketManager) broadcastMessage(msg models.Message) {
+// 	manager.mutex.Lock()
+// 	defer manager.mutex.Unlock()
+// 	for client := range manager.clients {
+// 		err := client.WriteJSON(msg)
+// 		if err != nil {
+// 			client.Close()
+// 			delete(manager.clients, client)
+// 		}
+// 	}
+// }
 
-func (manager *WebSocketManager) removeClient(conn *websocket.Conn) {
-	manager.mutex.Lock()
-	defer manager.mutex.Unlock()
-	delete(manager.clients, conn)
-}
+// func WebSocketEndpoint(db *gorm.DB) http.HandlerFunc {
+// 	return func(w http.ResponseWriter, r *http.Request) {
+// 		database.MigrateMessage(db) // Assurez-vous que la table Message existe
 
-func (manager *WebSocketManager) broadcastMessage(msg models.Message) {
-	manager.mutex.Lock()
-	defer manager.mutex.Unlock()
-	for client := range manager.clients {
-		err := client.WriteJSON(msg)
-		if err != nil {
-			client.Close()
-			delete(manager.clients, client)
-		}
-	}
-}
+// 		conn, err := upgrader.Upgrade(w, r, nil)
+// 		if err != nil {
+// 			http.Error(w, "Failed to upgrade connection", http.StatusInternalServerError)
+// 			return
+// 		}
+// 		defer conn.Close()
 
-func WebSocketEndpoint(db *gorm.DB) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		database.MigrateMessage(db) // Assurez-vous que la table Message existe
+// 		wsManager.addClient(conn)
+// 		defer wsManager.removeClient(conn)
 
-		conn, err := upgrader.Upgrade(w, r, nil)
-		if err != nil {
-			http.Error(w, "Failed to upgrade connection", http.StatusInternalServerError)
-			return
-		}
-		defer conn.Close()
+// 		for {
+// 			var msg models.Message
+// 			err := conn.ReadJSON(&msg)
+// 			if err != nil {
+// 				if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
+// 					http.Error(w, "Unexpected error", http.StatusInternalServerError)
+// 				}
+// 				break
+// 			}
 
-		wsManager.addClient(conn)
-		defer wsManager.removeClient(conn)
+// 			if err := db.Create(&msg).Error; err != nil {
+// 				conn.WriteJSON(map[string]string{"error": "Failed to save message"})
+// 				continue
+// 			}
 
-		for {
-			var msg models.Message
-			err := conn.ReadJSON(&msg)
-			if err != nil {
-				if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-					http.Error(w, "Unexpected error", http.StatusInternalServerError)
-				}
-				break
-			}
-
-			if err := db.Create(&msg).Error; err != nil {
-				conn.WriteJSON(map[string]string{"error": "Failed to save message"})
-				continue
-			}
-
-			wsManager.broadcastMessage(msg)
-		}
-	}
-}
+// 			wsManager.broadcastMessage(msg)
+// 		}
+// 	}
+// }
