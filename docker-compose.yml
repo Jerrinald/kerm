@@ -11,6 +11,11 @@ services:
       - POSTGRES_DB=articlesDB
       - POSTGRES_USER=janire
       - POSTGRES_PASSWORD=password
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U janire"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   adminer:
     image: adminer
@@ -26,7 +31,8 @@ services:
     volumes:
       - ./backend:/app/backend
     depends_on:
-      - database
+      database:
+        condition: service_healthy
     environment:
       - DATABASE_URL=postgresql://janire:password@database:5432/articlesDB
     restart: always
@@ -43,5 +49,3 @@ services:
     depends_on:
       - backend
     restart: always
-
-  
