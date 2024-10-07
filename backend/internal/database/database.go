@@ -1,6 +1,8 @@
 package database
 
 import (
+	"time"
+
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -27,11 +29,16 @@ func (g *GormDB) Find(out interface{}, where ...interface{}) error {
 
 func ConnectDB() (*gorm.DB, error) {
 	dsn := "user=janire password=password dbname=articlesDB port=5432 sslmode=disable host=database"
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	if err != nil {
-		return nil, err
+	var db *gorm.DB
+	var err error
+	for i := 0; i < 10; i++ { // retry 10 times with 5s delay
+		db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+		if err == nil {
+			return db, nil
+		}
+		time.Sleep(5 * time.Second)
 	}
-	return db, nil
+	return nil, err // Return the last error after retries
 }
 
 func NewGormDB(db *gorm.DB) *GormDB {
