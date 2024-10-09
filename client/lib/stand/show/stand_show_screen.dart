@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_flash_event/core/models/stand.dart';
+import 'package:flutter_flash_event/kermesse/show/kermesse_show_screen.dart';
+import 'package:flutter_flash_event/stand/access/stand_access_screen.dart';
 import 'package:flutter_flash_event/stand/form/form_stand_screen.dart';
 import 'package:flutter_flash_event/stand/show/bloc/stand_show_bloc.dart';
+import 'package:flutter_flash_event/stand/stock/stock_screen.dart';
 import 'package:intl/intl.dart';
 
 class StandShowScreen extends StatelessWidget {
@@ -46,6 +49,31 @@ class StandShowScreen extends StatelessWidget {
                             fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 16),
+                      Text(
+                        'Achat de ${stand.name}',
+                        style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 16),
+                      if (state.role == 'standOwner' || state.role == 'organisateur') ...[
+                        Text(
+                          'Stock restants: ${state.stand!.stock}', // Display remaining stock
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        ElevatedButton(
+                          onPressed: () {
+                            // Navigate to stock management screen
+                            StockScreen.navigateTo(context, id: state.stand!.id);
+                          },
+                          child: const Text('Gérer le stock'),
+                        ),
+                        const SizedBox(height: 16),
+                      ],
                       // Add more widgets displaying other stand details as needed
                     ],
                   ),
@@ -53,6 +81,20 @@ class StandShowScreen extends StatelessWidget {
               )
                   : const Center(child: Text("Stand not found")),
               floatingActionButton: _buildFloatingActionButton(context, stand, role),
+              bottomNavigationBar: Container(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start, // Align the button to the start (left)
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        KermesseShowScreen.navigateTo(context, id: state.stand!.kermesseId);
+                      },
+                      child: const Text('Back'),
+                    ),
+                  ],
+                ),
+              ),
             ),
           );
         },
@@ -99,21 +141,15 @@ class StandShowScreen extends StatelessWidget {
       switch (standType.toLowerCase()) {
         case 'food':
         // Handle food purchase logic
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Vous avez choisi d\'acheter de la nourriture!')),
-          );
+          StandAccessScreen.navigateTo(context, id: id);
           break;
         case 'drink':
         // Handle drink purchase logic
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Vous avez choisi d\'acheter une boisson!')),
-          );
+          StandAccessScreen.navigateTo(context, id: id);
           break;
         case 'activity':
         // Handle participation logic
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Vous avez choisi de participer à l\'activité!')),
-          );
+          StandAccessScreen.navigateTo(context, id: id);
           break;
         default:
           ScaffoldMessenger.of(context).showSnackBar(

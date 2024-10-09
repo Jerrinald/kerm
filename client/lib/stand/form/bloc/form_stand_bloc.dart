@@ -55,7 +55,8 @@ class FormStandBloc extends Bloc<FormStandEvent, FormStandState> {
           kermesseId: event.id,
           type: state.type!,
           maxPoint:  0,
-          name: state.name!
+          name: state.name!,
+          stock: 0
       );
 
       try {

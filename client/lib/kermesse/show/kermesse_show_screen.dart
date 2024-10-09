@@ -32,6 +32,7 @@ class KermesseShowScreen extends StatelessWidget {
           final stands = state.stands;
           final role = state.role;
           final actor = state.actor;
+          final actorChild = state.actorChild;
 
           return SafeArea(
             child: Scaffold(
@@ -56,7 +57,7 @@ class KermesseShowScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 16),
                       // Display actor-specific UI based on the actor's state
-                      _buildActorStatus(context, actor, stands),
+                      _buildActorStatus(context, actor, stands, state.role, actorChild),
                     ],
                   ),
                 ),
@@ -72,7 +73,7 @@ class KermesseShowScreen extends StatelessWidget {
   }
 
   // Method to display actor status and control rendering of the stands list
-  Widget _buildActorStatus(BuildContext context, Actor? actor, List<Stand>? stands) {
+  Widget _buildActorStatus(BuildContext context, Actor? actor, List<Stand>? stands, String? role, List<ActorUser>? actorChild) {
     if (actor == null) {
       return ElevatedButton(
         onPressed: () {
@@ -132,8 +133,42 @@ class KermesseShowScreen extends StatelessWidget {
         ],
       );
     } else {
-      // If actor is active, show the list of stands
-      return _buildStandsList(context, stands);
+      // If actor is active, show the list of stands and actor.nbJeton for "parent" or "eleve"
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (role == 'parent' || role == 'eleve') ...[
+            const SizedBox(height: 16),
+            Text(
+              'Nombre de jetons: ${actor.nbJeton}',
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            if (role == 'parent' && actorChild != null && actorChild.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              const Text(
+                'Enfants:',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              for (var child in actorChild) ...[
+                Text(
+                  '${child.lastname} : ${child.nbJeton} jetons',
+                  style: const TextStyle(fontSize: 14),
+                ),
+                const SizedBox(height: 4),
+              ],
+            ],
+            const SizedBox(height: 16),
+          ],
+          _buildStandsList(context, stands),
+        ],
+      );
     }
   }
 

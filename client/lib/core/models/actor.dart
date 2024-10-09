@@ -31,7 +31,7 @@ class Actor {
       'id': id,
       'userId': userId,
       'kermesseId': kermesseId,
-      'nb_jeton': kermesseId,
+      'nb_jeton': nbJeton,
       'response': response,
       'active': active,
     };
@@ -80,7 +80,7 @@ class ActorUser {
       'id': id,
       'user_id': userId,
       'kermesse_id': kermesseId,
-      'nb_jeton': kermesseId,
+      'nb_jeton': nbJeton,
       'response': response,
       'active': active,
       'email': email,

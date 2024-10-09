@@ -50,12 +50,6 @@ class HomeScreen extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          IconButton(
-                            icon: const Icon(Icons.menu),
-                            onPressed: () {
-                              // Action pour le menu
-                            },
-                          ),
                           Image.asset(
                             'assets/flash-event-logo.png',
                             height: 60, // Ajuster la taille du logo selon vos besoins
@@ -71,16 +65,16 @@ class HomeScreen extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: () {
-                          DemandeAllScreen.navigateTo(context);
-                        },
-                        // Dynamically display the button text based on counter
-                        child: Text('Liste des demandes'),
-                      ),
+                      if (state.role == 'organisateur')
+                        ElevatedButton(
+                          onPressed: () {
+                            DemandeAllScreen.navigateTo(context);
+                          },
+                          child: const Text('Liste des demandes'),
+                        ),
                       const SizedBox(height: 16),
                       const Text(
-                        'Kermesses',
+                        'Mes kermesses',
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,

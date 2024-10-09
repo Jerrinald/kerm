@@ -7,10 +7,13 @@ import 'package:flutter_flash_event/kermesse/form/form_kermesse_screen.dart';
 import 'package:flutter_flash_event/kermesse/show/kermesse_show_screen.dart';
 import 'package:flutter_flash_event/myAccount/my_account_screen.dart';
 import 'package:flutter_flash_event/login/login_screen.dart';
+import 'package:flutter_flash_event/myAccount/newKid/new_kid_screen.dart';
 import 'package:flutter_flash_event/screens/register_screen.dart';
 import 'package:flutter_flash_event/screens/splash_screen.dart';
+import 'package:flutter_flash_event/stand/access/stand_access_screen.dart';
 import 'package:flutter_flash_event/stand/form/form_stand_screen.dart';
 import 'package:flutter_flash_event/stand/show/stand_show_screen.dart';
+import 'package:flutter_flash_event/stand/stock/stock_screen.dart';
 import 'package:flutter_flash_event/tombola/new/tombola_new_screen.dart';
 
 Route<dynamic> generateRoute(RouteSettings settings) {
@@ -32,12 +35,18 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return MaterialPageRoute(builder: (context) => KermesseShowScreen(id: args as int));
     case StandShowScreen.routeName:
       return MaterialPageRoute(builder: (context) => StandShowScreen(id: args as int));
+    case StandAccessScreen.routeName:
+      return MaterialPageRoute(builder: (context) => StandAccessScreen(id: args as int));
     case TombolaNewScreen.routeName:
       return MaterialPageRoute(builder: (context) => TombolaNewScreen(id: args as int));
     case JetonNewScreen.routeName:
       return MaterialPageRoute(builder: (context) => JetonNewScreen(id: args as int));
     case DemandeAllScreen.routeName:
       return MaterialPageRoute(builder: (context) => DemandeAllScreen());
+    case NewKidScreen.routeName:
+      return MaterialPageRoute(builder: (context) => NewKidScreen());
+    case StockScreen.routeName:
+      return MaterialPageRoute(builder: (context) => StockScreen(id: args as int));
     default:
       return MaterialPageRoute(builder: (_) => SplashScreen());
   }

@@ -22,7 +22,7 @@ class StandServices {
         },
       );
       if (response.statusCode < 200 || response.statusCode >= 400) {
-        return Stand(id: 0, actorId: 0, kermesseId: 0, type: "", maxPoint: 0, name: "");
+        return Stand(id: 0, actorId: 0, kermesseId: 0, type: "", maxPoint: 0, name: "", stock: 0);
       }
 
       final data = json.decode(response.body) as Map<String, dynamic>;
@@ -46,7 +46,7 @@ class StandServices {
         },
       );
       if (response.statusCode < 200 || response.statusCode >= 400) {
-        return Stand(id: 0, actorId: 0, kermesseId: 0, type: "", maxPoint: 0, name: "");
+        return Stand(id: 0, actorId: 0, kermesseId: 0, type: "", maxPoint: 0, name: "", stock: 0);
       }
 
       final data = json.decode(response.body) as Map<String, dynamic>;
@@ -108,6 +108,33 @@ class StandServices {
     } catch (error) {
       log('Error occurred while retrieving users.', error: error);
       rethrow;
+    }
+  }
+
+  static Future<http.Response> updateStandrById(Stand stand) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
+
+    try {
+      final response = await http.patch(
+        Uri.parse('${ApiEndpoints.baseUrl}/stands/${stand.id}'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $token', // Include token in headers
+        },
+        body: json.encode(stand.toJson()),
+      );
+
+      if (response.statusCode < 200 || response.statusCode >= 400) {
+        throw ApiException(
+            message: 'Error while updating stand with id ${stand.id}',
+            statusCode: response.statusCode);
+      }
+
+      return response;
+    } catch (error) {
+      throw ApiException(
+          message: 'Unknown error while updating stand with id ${stand.id} ${error}');
     }
   }
 }

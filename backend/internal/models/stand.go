@@ -8,4 +8,5 @@ type Stand struct {
 	Name       string `json:"name"`
 	Type       string `json:"type"`
 	MaxPoint   int    `json:"max_point" gorm:"default:0"`
+	Stock      int    `json:"stock" gorm:"default:0"`
 }

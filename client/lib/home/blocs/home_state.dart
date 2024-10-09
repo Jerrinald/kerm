@@ -10,8 +10,10 @@ final class HomeLoading extends HomeState {}
 final class HomeDataLoadSuccess extends HomeState {
   final List<Kermesse> myKermesses;
   final List<Kermesse> allKermesses;
+  final String role;
 
-  HomeDataLoadSuccess({required this.myKermesses, required this.allKermesses});
+  HomeDataLoadSuccess({required this.myKermesses, required this.allKermesses,
+  required this.role});
 }
 
 

@@ -75,6 +75,15 @@ func RegisterAuthRoutes(router *mux.Router, api *swag.API, db *gorm.DB) {
 			endpoint.Tags("Users"),
 		),
 		endpoint.New(
+			http.MethodPost, "/register-kid",
+			endpoint.Handler(http.HandlerFunc(controllers.RegisterKid(db))),
+			endpoint.Summary("Register a new user"),
+			endpoint.Description("Register a new kid with a username and password"),
+			endpoint.Body(models.User{}, "User object that needs to be registered", true),
+			endpoint.Response(http.StatusCreated, "Successfully registered kid", endpoint.SchemaResponseOption(&models.User{})),
+			endpoint.Tags("Users"),
+		),
+		endpoint.New(
 			http.MethodGet, "/users",
 			endpoint.Handler(http.HandlerFunc(controllers.GetAllUsers(db))),
 			endpoint.Summary("Get all users"),
@@ -120,6 +129,16 @@ func RegisterAuthRoutes(router *mux.Router, api *swag.API, db *gorm.DB) {
 			endpoint.Description("Delete a user by their ID"),
 			endpoint.Path("userId", "integer", "ID of the user to delete", true),
 			endpoint.Response(http.StatusNoContent, "Successfully deleted user"),
+			endpoint.Security("BearerAuth"),
+			endpoint.Tags("Users"),
+		),
+
+		endpoint.New(
+			http.MethodGet, "/users-parent", // Define the endpoint with the `parentId` parameter
+			endpoint.Handler(http.HandlerFunc(controllers.GetUsersByParentID(db))), // Call the appropriate controller function
+			endpoint.Summary("Get users by Parent"),
+			endpoint.Description("Retrieve all users with the parent "),
+			endpoint.Response(http.StatusOK, "Successfully retrieved users", endpoint.SchemaResponseOption(&[]models.User{})),
 			endpoint.Security("BearerAuth"),
 			endpoint.Tags("Users"),
 		),
@@ -197,6 +216,17 @@ func RegisterAuthRoutes(router *mux.Router, api *swag.API, db *gorm.DB) {
 			endpoint.Response(http.StatusOK, "successful operation", endpoint.SchemaResponseOption(&models.Stand{})),
 			endpoint.Security("BearerAuth"),
 			endpoint.Tags("Stands"),
+		),
+		endpoint.New(
+			http.MethodPatch, "/stands/{standId}", // Define the endpoint path
+			endpoint.Handler(http.HandlerFunc(controllers.UpdateStandStock(db))), // Use the UpdateStandStock handler
+			endpoint.Summary("Update stand stock"),
+			endpoint.Description("Update the stock for a specific stand"),
+			endpoint.Path("standId", "integer", "ID of the stand to update", true), // Path parameter for standId
+			endpoint.Body(models.Stand{}, "stand object that needs to be added", true),
+			endpoint.Response(http.StatusOK, "Successfully updated stand", endpoint.SchemaResponseOption(&models.Stand{})), // Response with the updated stand
+			endpoint.Security("BearerAuth"),                                                                                // Add security if applicable
+			endpoint.Tags("Stands"),                                                                                        // Tag the route under "Stands"
 		),
 		endpoint.New(
 			http.MethodGet, "/stands",
@@ -290,7 +320,28 @@ func RegisterAuthRoutes(router *mux.Router, api *swag.API, db *gorm.DB) {
 			endpoint.Description("Get kermesses for the authenticated user with actors who either have both response = true and active = true, or both response = false and active = false."),
 			endpoint.Response(http.StatusOK, "Successfully retrieved actors with user info", endpoint.SchemaResponseOption(&[]models.ActorUser{})),
 			endpoint.Security("BearerAuth"), // Require Bearer Authentication
-			endpoint.Tags("Kermesses", "Actors"),
+			endpoint.Tags("Actors"),
+		),
+		endpoint.New(
+			http.MethodGet, "/actors-kid",
+			endpoint.Handler(http.HandlerFunc(controllers.GetChildActorsByKermesse(db))), // Reference to the new function
+			endpoint.Summary("Get my kermesses with actors"),
+			endpoint.Description("Get kermesses for the authenticated user"),
+			endpoint.Query("kermesse_id", "integer", "The ID of the Kermesse", true), // Query parameter for kermesse ID
+			endpoint.Response(http.StatusOK, "Successfully retrieved actors with user info", endpoint.SchemaResponseOption(&[]models.ActorUser{})),
+			endpoint.Security("BearerAuth"), // Require Bearer Authentication
+			endpoint.Tags("Actors"),
+		),
+		endpoint.New(
+			http.MethodPost, "/payment_intent",
+			endpoint.Handler(http.HandlerFunc(controllers.CreatePaymentIntent)), // Call the CreatePaymentIntent function
+			endpoint.Summary("Create payment intent for tickets"),
+			endpoint.Description("Create a payment intent for a number of tickets based on the provided number of tickets (nbJeton)"),
+			endpoint.Body(struct {
+				NbJeton int `json:"nbJeton"`
+			}{}, "Request body to include number of tickets", true),
+			endpoint.Response(http.StatusOK, "Successfully created payment intent", endpoint.SchemaResponseOption(&map[string]string{"clientSecret": ""})),
+			endpoint.Tags("Payment"),
 		),
 	)
 

@@ -203,3 +203,43 @@ func GetStandByActorAndKermesse(db *gorm.DB) http.HandlerFunc {
 		log.Println("Stand encoded and sent successfully")
 	}
 }
+
+func UpdateStandStock(db *gorm.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		standID, err := strconv.Atoi(vars["standId"])
+		if err != nil {
+			log.Printf("Invalid stand ID: %v", err)
+			http.Error(w, "Invalid stand ID", http.StatusBadRequest)
+			return
+		}
+
+		// Find the stand in the database
+		var stand models.Stand
+		if err := db.First(&stand, standID).Error; err != nil {
+			log.Printf("Error finding stand with ID %d: %v", standID, err)
+			http.Error(w, "Stand not found", http.StatusNotFound)
+			return
+		}
+
+		// Decode the request body into a Stand struct
+		var updatedStand models.Stand
+		if err := json.NewDecoder(r.Body).Decode(&updatedStand); err != nil {
+			log.Printf("Error decoding request body: %v", err)
+			http.Error(w, "Invalid request payload", http.StatusBadRequest)
+			return
+		}
+		stand.Stock = updatedStand.Stock
+
+		// Save the changes to the database
+		if err := db.Save(&stand).Error; err != nil {
+			log.Printf("Error updating stand: %v", err)
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
+			return
+		}
+
+		log.Printf("Stand updated successfully: %+v", stand)
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(stand)
+	}
+}

@@ -33,6 +33,8 @@ class KermesseShowBloc extends Bloc<KermesseShowEvent, KermesseShowState> {
 
         final actor = await ActorServices.getMyActor(id: event.id);
 
+        final actorChild = await ActorServices.getChildActorWithMyKermesses(id: event.id);
+
         SharedPreferences prefs = await SharedPreferences.getInstance();
         String? role = prefs.getString('role');
 
@@ -45,6 +47,7 @@ class KermesseShowBloc extends Bloc<KermesseShowEvent, KermesseShowState> {
             kermesse: kermesse,
             stands: stands,
             stand: stand,
+            actorChild: actorChild,
             role: role, // Update isStandOwner
             actor: actor
           ));
@@ -54,6 +57,7 @@ class KermesseShowBloc extends Bloc<KermesseShowEvent, KermesseShowState> {
             status: KermesseShowStatus.success,
             kermesse: kermesse,
             stands: stands,
+            actorChild: actorChild,
             role: role,
               actor: actor
           ));

@@ -7,6 +7,7 @@ class KermesseShowState {
   final Kermesse? kermesse;
   final Stand? stand;
   final List<Stand>? stands;
+  final List<ActorUser>? actorChild;
   final String? role;
   final Actor? actor;
   final String? errorMessage;
@@ -16,6 +17,7 @@ class KermesseShowState {
     this.kermesse,
     this.stand,
     this.stands,
+    this.actorChild,
     this.role,
     this.actor,
     this.errorMessage,
@@ -26,6 +28,7 @@ class KermesseShowState {
     Kermesse? kermesse,
     Stand? stand,
     List<Stand>? stands,
+    List<ActorUser>? actorChild,
     String? role,
     Actor? actor,
     String? errorMessage,
@@ -35,6 +38,7 @@ class KermesseShowState {
       kermesse: kermesse ?? this.kermesse,
       stand: stand ?? this.stand,
       stands: stands ?? this.stands,
+      actorChild: actorChild ?? this.actorChild,
       role: role ?? this.role,
       actor: actor ?? this.actor,
       errorMessage: errorMessage ?? this.errorMessage,

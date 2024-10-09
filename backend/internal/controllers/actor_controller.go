@@ -79,9 +79,7 @@ func UpdateActorNbJeton(db *gorm.DB) http.HandlerFunc {
 		}
 
 		// Parse the request body to get the new nbJeton value
-		var updatedActor struct {
-			NbJeton int `json:"nb_jeton"`
-		}
+		var updatedActor models.Actor
 		if err := json.NewDecoder(r.Body).Decode(&updatedActor); err != nil {
 			http.Error(w, "Invalid request body", http.StatusBadRequest)
 			return
@@ -256,5 +254,75 @@ func GetActorsWithMyKermesses(db *gorm.DB) http.HandlerFunc {
 		}
 
 		fmt.Println("Response encoded and sent successfully")
+	}
+}
+
+func GetChildActorsByKermesse(db *gorm.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Retrieve the user from the token
+		user, err := GetUserFromToken(r, db)
+		if err != nil {
+			log.Printf("Error getting user from token: %v", err)
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+
+		// Get the kermesseId from the query parameters
+		kermesseIDParam := r.URL.Query().Get("kermesse_id")
+		if kermesseIDParam == "" {
+			http.Error(w, "kermesse_id query parameter is required", http.StatusBadRequest)
+			return
+		}
+
+		// Convert kermesseId string to uint
+		kermesseID, err := strconv.ParseUint(kermesseIDParam, 10, 32)
+		if err != nil {
+			http.Error(w, "Invalid kermesse_id", http.StatusBadRequest)
+			return
+		}
+
+		// Find all users who have the current user as their parent (children of the authenticated user)
+		var children []models.User
+		if err := db.Where("parent_id = ?", user.ID).Find(&children).Error; err != nil {
+			http.Error(w, "Error retrieving children", http.StatusInternalServerError)
+			return
+		}
+
+		if len(children) == 0 {
+			http.Error(w, "No children found", http.StatusNotFound)
+			return
+		}
+
+		// Collect child IDs
+		var childIDs []uint
+		for _, child := range children {
+			childIDs = append(childIDs, child.ID)
+		}
+
+		// Find actors for the children that belong to the specified kermesse
+		var actorUsers []models.ActorUser
+		result := db.Table("actors").
+			Select("actors.id, actors.user_id, actors.kermesse_id, actors.active, actors.response, actors.nb_jeton, users.email, users.firstname, users.lastname").
+			Joins("JOIN users ON users.id = actors.user_id").
+			Where("actors.kermesse_id = ? AND actors.user_id IN ?", uint(kermesseID), childIDs).
+			Find(&actorUsers)
+
+		if result.Error != nil {
+			fmt.Println("Error retrieving actors for children:", result.Error)
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
+			return
+		}
+
+		// Return the actors in JSON format
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		err = json.NewEncoder(w).Encode(actorUsers)
+		if err != nil {
+			fmt.Println("Error encoding response to JSON:", err)
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
+			return
+		}
+
+		fmt.Println("Actors for children retrieved successfully")
 	}
 }

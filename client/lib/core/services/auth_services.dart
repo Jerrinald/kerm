@@ -19,9 +19,42 @@ class AuthServices {
       'username': user.username,
       'email': user.email,
       'password': user.password,
+      'role': user.role,
     });
 
     log('Registering user at $uri with body: $body');
+
+    final response = await http.post(uri, headers: headers, body: body);
+
+    if (response.statusCode == 201) {
+      return response;
+    } else {
+      throw Exception('Failed to register user');
+    }
+  }
+
+
+  static Future<http.Response> registerKid(User user) async {
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
+
+
+    final uri = Uri.parse('${ApiEndpoints.baseUrl}/register-kid');
+    final headers = <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+      'Authorization': 'Bearer $token', // Include token in headers
+    };
+    final body = jsonEncode(<String, String>{
+      'firstname': user.firstname,
+      'lastname': user.lastname,
+      'username': user.username,
+      'email': user.email,
+      'password': user.password,
+      'role' : user.role
+    });
+
+    log('Registering kid at $uri with body: $body');
 
     final response = await http.post(uri, headers: headers, body: body);
 

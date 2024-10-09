@@ -19,6 +19,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _passwordController = TextEditingController();
   bool _isLoading = false;
 
+  // Add role state
+  final Map<String, String> _roleLabels = {
+    'organisateur': 'Organisateur',
+    'standOwner': 'Animateur de stand',
+    'parent': 'Parent',
+  };
+
+  String? _selectedRole;
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -42,7 +51,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
         email: _emailController.text,
         password: _passwordController.text,
         id: 0,
-        role: '',
+        role: _selectedRole ?? '',
+        parentId: 0,  // Add the selected role here
+
       );
 
       try {
@@ -54,7 +65,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Échec de l\'inscription')),
+            const SnackBar(content: Text('Échec de l\'inscription')),
           );
         }
       } catch (e) {
@@ -72,7 +83,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF9F9F9),
+      backgroundColor: const Color(0xFFF9F9F9),
       body: Container(
         padding: const EdgeInsets.all(16.0),
         child: Center(
@@ -97,12 +108,41 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   _buildTextField(_lastNameController, 'Entrez votre nom', 'Nom', validator: _validateName),
                   _buildTextField(_usernameController, 'Entrez votre nom d’utilisateur', 'Nom d’utilisateur', validator: _validateUsername),
                   _buildTextField(_passwordController, 'Entrez votre mot de passe', 'Mot de passe', isPassword: true, validator: _validatePassword),
+
+                  // Add dropdown for selecting role
+                  const SizedBox(height: 10),
+                  DropdownButtonFormField<String>(
+                    value: _selectedRole,
+                    hint: const Text('Sélectionnez un rôle'),
+                    // Use the map values (labels) for displaying in the dropdown
+                    items: _roleLabels.entries.map((entry) {
+                      return DropdownMenuItem<String>(
+                        value: entry.key, // Store the key (role) as the value
+                        child: Text(entry.value), // Display the label
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedRole = value;
+                      });
+                    },
+                    validator: (value) => value == null ? 'Veuillez sélectionner un rôle' : null,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30.0),
+                        borderSide: BorderSide.none,
+                      ),
+                      filled: true,
+                      fillColor: Colors.white,
+                    ),
+                  ),
+
                   const SizedBox(height: 20),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFF6058E9),
+                      backgroundColor: const Color(0xFF6058E9),
                       foregroundColor: Colors.white, // Corrected property
-                      minimumSize: Size(double.infinity, 50),
+                      minimumSize: const Size(double.infinity, 50),
                     ),
                     onPressed: _register,
                     child: const Text('S\'inscrire'),
@@ -119,7 +159,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       child: Text(
                         'Déjà inscrit ? Cliquez ici',
                         style: TextStyle(
-                          color: Theme.of(context).primaryColor, // Utilise la couleur principale du thème
+                          color: Theme.of(context).primaryColor,
                           decoration: TextDecoration.underline,
                           fontWeight: FontWeight.bold,
                         ),

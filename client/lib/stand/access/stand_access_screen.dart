@@ -3,13 +3,25 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_flash_event/home/home_screen.dart';
 import 'package:flutter_flash_event/stand/access/bloc/stand_access_bloc.dart';
 import 'package:flutter_flash_event/stand/show/stand_show_screen.dart';
+import 'package:flutter_flash_event/stand/stock/stock_screen.dart';
 import 'package:intl/intl.dart';
 
 class StandAccessScreen extends StatelessWidget {
   static const String routeName = '/stand-access';
 
   static navigateTo(BuildContext context, {required int id}) {
-    Navigator.of(context).pushNamed(routeName, arguments: id);
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => BlocProvider<StandAccessBloc>(
+          create: (context) {
+            final bloc = StandAccessBloc(); // Create the StandAccessBloc instance
+            bloc.add(StandAccessDataLoaded(id: id)); // Trigger StandAccessDataLoaded when the screen loads
+            return bloc;
+          },
+          child: StandAccessScreen(id: id),
+        ),
+      ),
+    );
   }
 
   final int id;
@@ -82,21 +94,18 @@ class StandAccessScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 16),
 
-                      if (state.nbJeton! >= counter)
+                      if (counter > state.nbJeton!)
                         const Text(
                           "Vous n'avez pas assez de jeton",
                           style: TextStyle(fontSize: 24),
                         ),
 
-                      // Show ElevatedButton only if counter > 0
                       if (counter > 0 && state.nbJeton! >= counter)
                         ElevatedButton(
                           onPressed: () {
                             BlocProvider.of<StandAccessBloc>(context).add(SubmitFormEvent(
                               onSuccess: () {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('$counter ${counter == 1 ? 'jeton' : 'jetons'} dépensés')), // Removed 'const'
-                                );
+                                StandShowScreen.navigateTo(context, id: id);
                               },
                               onError: (errorMessage) {
                                 ScaffoldMessenger.of(context).showSnackBar(
@@ -112,39 +121,45 @@ class StandAccessScreen extends StatelessWidget {
                     ],
                   )
                 else if (state.stand!.type == 'activity')
-                  const Center(
-                    child: Text('Activity mode: Press the button below to run the activity'),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center, // Align the column items vertically in the center
+                    children: [
+                      const Center(
+                        child: Text('Activity mode: Press the button below to run the activity'),
+                      ),
+                      const SizedBox(height: 16), // Add some spacing between the text and the button
+                      ElevatedButton(
+                        onPressed: () {
+                          BlocProvider.of<StandAccessBloc>(context).add(
+                            ActivityGameEvent(
+                              id: id,
+                              onSuccess: () {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Congratulations, you won the game!')),
+                                );
+                              },
+                              onLose: () {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Sorry, you lost the game.')),
+                                );
+                              },
+                              onError: (errorMessage) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(errorMessage)),
+                                );
+                              },
+                            ),
+                          );
+                        },
+                        child: const Text('Jouer'),
+                      ),
+                    ],
                   ),
-                  ElevatedButton(
-                    onPressed: () {
-                      BlocProvider.of<StandAccessBloc>(context).add(
-                          ActivityGameEvent(
-                            id: id,
-                            onSuccess: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Congratulations, you won the game!')),
-                              );
-                            },
-                            onLose: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Sorry, you lost the game.')),
-                              );
-                            },
-                            onError: (errorMessage) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(errorMessage)),
-                              );
-                            },
-                        ));
-                      },
-                      child: const Text('Créer le stand'),
-                    ),
               ],
             ),
           );
         },
       ),
-
     );
   }
 }

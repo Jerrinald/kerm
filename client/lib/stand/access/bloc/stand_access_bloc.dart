@@ -28,6 +28,8 @@ class StandAccessBloc extends Bloc<StandAccessEvent, StandAccessState> {
         SharedPreferences prefs = await SharedPreferences.getInstance();
         int? nbJeton = prefs.getInt('nbJeton');
 
+        print(nbJeton);
+
         emit(state.copyWith(
             status: StandAccessStatus.success,
             stand: stand,

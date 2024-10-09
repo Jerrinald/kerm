@@ -147,4 +147,33 @@ class ActorServices {
     }
   }
 
+  static Future<List<ActorUser>> getChildActorWithMyKermesses({required int id}) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
+    try {
+      final response = await http.get(
+        Uri.parse('${ApiEndpoints.baseUrl}/actors-kid?kermesse_id=${id}'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $token', // Include token in headers
+        },
+      );
+      // Simulate call length for loader display
+      await Future.delayed(const Duration(seconds: 1));
+
+      if (response.statusCode < 200 || response.statusCode >= 400) {
+        return [];
+      }
+
+      final data = json.decode(response.body);
+      return (data as List<dynamic>?)?.map((e) {
+        return ActorUser.fromJson(e);
+      }).toList() ??
+          [];
+    } catch (error) {
+      log('Error occurred while retrieving users.', error: error);
+      rethrow;
+    }
+  }
+
 }

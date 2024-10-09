@@ -36,9 +36,9 @@ func AddStandSell(db *gorm.DB) http.HandlerFunc {
 		}
 
 		var stand models.Stand
-		if err := db.Where("stand_id = ?", standRequest.StandID).First(&stand).Error; err != nil {
+		if err := db.Where("id = ?", standRequest.StandID).First(&stand).Error; err != nil {
 			log.Printf("Error finding stand %d: %v", standRequest.StandID, err)
-			http.Error(w, "Actor not found", http.StatusNotFound)
+			http.Error(w, "Stand not found", http.StatusNotFound)
 			return
 		}
 
@@ -65,6 +65,16 @@ func AddStandSell(db *gorm.DB) http.HandlerFunc {
 			return
 		}
 		log.Printf("Stand statistic created successfully: %+v", statStand)
+
+		actor.NbJeton = actor.NbJeton - standRequest.NbJeton
+		if err := db.Save(&actor).Error; err != nil {
+			http.Error(w, "Error updating actor", http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode(statStand)
 	}
 }
 

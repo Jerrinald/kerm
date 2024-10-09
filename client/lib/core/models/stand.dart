@@ -5,6 +5,7 @@ class Stand {
   final String name;
   final String type;
   final int maxPoint;
+  final int stock;
 
   Stand({
     required this.id,
@@ -13,6 +14,7 @@ class Stand {
     required this.type,
     required this.name,
     required this.maxPoint,
+    required this.stock,
   });
 
   factory Stand.fromJson(Map<String, dynamic> json) {
@@ -23,6 +25,7 @@ class Stand {
       name: json['name'],
       type: json['type'],
       maxPoint: json['max_point'],
+      stock: json['stock'],
     );
   }
 
@@ -34,6 +37,7 @@ class Stand {
       'name': name,
       'type': type,
       'max_point': maxPoint,
+      'stock': stock,
     };
   }
 }
